@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Rental Properties</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .property { border: 1px solid #ccc; margin: 10px 0; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Rental Properties</h1>
+  <div id="property-list"></div>
+
+  <h2>Add New Property</h2>
+  <form id="property-form">
+    <input type="text" id="name" placeholder="Property Name" required><br><br>
+    <input type="text" id="location" placeholder="Location" required><br><br>
+    <label><input type="checkbox" id="available"> Available</label><br><br>
+    <button type="submit">Add Property</button>
+  </form>
+
+  <script>
+    async function loadProperties() {
+      const res = await fetch('/properties');
+      const data = await res.json();
+      const list = document.getElementById('property-list');
+      list.innerHTML = '';
+      data.forEach(p => {
+        list.innerHTML += `
+          <div class="property">
+            <strong>${p.name}</strong><br>
+            Location: ${p.location}<br>
+            Available: ${p.available ? 'Yes' : 'No'}
+          </div>`;
+      });
+    }
+
+    document.getElementById('property-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const newProperty = {
+        name: document.getElementById('name').value,
+        location: document.getElementById('location').value,
+        available: document.getElementById('available').checked
+      };
+      await fetch('/properties', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProperty)
+      });
+      document.getElementById('property-form').reset();
+      loadProperties();
+    });
+
+    loadProperties();
+  </script>
+</body>
+</html>
